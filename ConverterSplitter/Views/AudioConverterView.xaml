@@ -1,0 +1,149 @@
+<UserControl x:Class="ConverterSplitter.Views.AudioConverterView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:ConverterSplitter.ViewModels"
+             xmlns:conv="clr-namespace:ConverterSplitter.Converters">
+    <UserControl.DataContext>
+        <vm:AudioConverterViewModel />
+    </UserControl.DataContext>
+    <UserControl.Resources>
+        <conv:FileSizeConverter x:Key="FileSizeConv" />
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+        <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis" />
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="8">
+            <TextBlock Text="Audio Format Converter" Style="{StaticResource SectionTitle}" FontSize="24" />
+            <TextBlock Text="Convert audio files between formats: MP3, WAV, FLAC, OGG, AAC."
+                       Foreground="#88FFFFFF" Margin="0,0,0,20" />
+
+            <!-- Drop Zone -->
+            <Border Style="{StaticResource DropZone}" AllowDrop="True"
+                    Drop="OnDrop" DragOver="OnDragOver"
+                    Visibility="{Binding IsConverting, Converter={StaticResource InvBoolToVis}}">
+                <StackPanel HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="MusicBoxMultipleOutline" Width="48" Height="48"
+                                             HorizontalAlignment="Center" Foreground="#55FFFFFF" />
+                    <TextBlock Text="Drag &amp; drop audio files here" FontSize="16"
+                               Foreground="#88FFFFFF" HorizontalAlignment="Center" Margin="0,12,0,8" />
+                    <Button Content="Browse Files" Command="{Binding BrowseFilesCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            HorizontalAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+            <!-- File List -->
+            <ItemsControl ItemsSource="{Binding Files}" Margin="0,16,0,0">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource FileListItem}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding FileName}" FontSize="14" Foreground="#E0E0E0" />
+                                    <TextBlock Foreground="#55FFFFFF" FontSize="11">
+                                        <Run Text="{Binding FileSize, Converter={StaticResource FileSizeConv}, Mode=OneWay}" />
+                                        <Run Text=" | " /><Run Text="{Binding Status}" />
+                                    </TextBlock>
+                                </StackPanel>
+                                <ProgressBar Grid.Column="1" Width="100" Height="6"
+                                             Value="{Binding Progress}" Maximum="100"
+                                             Margin="12,0" VerticalAlignment="Center" Foreground="#B39DDB" />
+                                <TextBlock Grid.Column="2" Text="{Binding Progress, StringFormat={}{0:F0}%}"
+                                           Foreground="#88FFFFFF" VerticalAlignment="Center" Width="40" Margin="0,0,8,0" />
+                                <Button Grid.Column="3"
+                                        Command="{Binding DataContext.RemoveFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding}"
+                                        Style="{StaticResource MaterialDesignIconButton}" Width="28" Height="28" Padding="0">
+                                    <materialDesign:PackIcon Kind="Close" Width="16" Height="16" />
+                                </Button>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Settings -->
+            <Border Style="{StaticResource CardBorder}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Text="Settings" Style="{StaticResource SectionTitle}" FontSize="16" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <TextBlock Text="Output Format" Foreground="#88FFFFFF" Margin="0,0,0,6" />
+                            <ComboBox ItemsSource="{x:Static vm:AudioConverterViewModel.OutputFormats}"
+                                      SelectedItem="{Binding SelectedFormat}"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="8,0">
+                            <TextBlock Text="Bitrate (kbps)" Foreground="#88FFFFFF" Margin="0,0,0,6" />
+                            <ComboBox ItemsSource="{x:Static vm:AudioConverterViewModel.Bitrates}"
+                                      SelectedItem="{Binding SelectedBitrate}"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Margin="8,0,0,0">
+                            <TextBlock Text="Sample Rate (Hz)" Foreground="#88FFFFFF" Margin="0,0,0,6" />
+                            <ComboBox ItemsSource="{x:Static vm:AudioConverterViewModel.SampleRates}"
+                                      SelectedItem="{Binding SelectedSampleRate}"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Margin="0,12,0,0">
+                        <TextBlock Text="Output Folder (optional)" Foreground="#88FFFFFF" Margin="0,0,0,6" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Text="{Binding OutputFolder}"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     materialDesign:HintAssist.Hint="Same as source" IsReadOnly="True" />
+                            <Button Grid.Column="1" Content="..." Margin="8,0,0,0"
+                                    Command="{Binding BrowseOutputFolderCommand}"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}" Padding="8,0" />
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Actions -->
+            <Grid Margin="0,16,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding StatusText}" Foreground="#80CBC4" FontSize="13" />
+                    <ProgressBar Value="{Binding OverallProgress}" Maximum="100" Height="4"
+                                 Margin="0,8,16,0" Foreground="#B39DDB"
+                                 Visibility="{Binding IsConverting, Converter={StaticResource BoolToVis}}" />
+                </StackPanel>
+                <Button Grid.Column="1" Content="Clear All" Margin="0,0,8,0"
+                        Command="{Binding ClearFilesCommand}"
+                        Style="{StaticResource MaterialDesignOutlinedButton}" />
+                <Button Grid.Column="2" Command="{Binding ConvertAllCommand}"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Background="#7E57C2" BorderBrush="#7E57C2">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="SwapHorizontal" VerticalAlignment="Center" />
+                        <TextBlock Text="Convert All" Margin="8,0,0,0" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

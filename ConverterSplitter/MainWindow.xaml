@@ -1,0 +1,155 @@
+<Window x:Class="ConverterSplitter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:vm="clr-namespace:ConverterSplitter.ViewModels"
+        xmlns:views="clr-namespace:ConverterSplitter.Views"
+        mc:Ignorable="d"
+        Title="Converter Splitter"
+        Height="750" Width="1150"
+        MinHeight="600" MinWidth="900"
+        WindowStartupLocation="CenterScreen"
+        Background="#121220"
+        TextElement.Foreground="#E0E0E0"
+        TextElement.FontWeight="Regular"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="Auto"
+        FontFamily="{materialDesign:MaterialDesignFont}">
+
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="240" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar -->
+        <Border Grid.Column="0" Background="#181828" CornerRadius="0,16,16,0">
+            <DockPanel>
+                <!-- App Title -->
+                <StackPanel DockPanel.Dock="Top" Margin="20,24,20,20">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ToolboxOutline" Width="28" Height="28"
+                                                 Foreground="#B39DDB" VerticalAlignment="Center" />
+                        <TextBlock Text="Converter" FontSize="22" FontWeight="Bold"
+                                   Foreground="#E0E0E0" Margin="10,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Text="Splitter" FontSize="22" FontWeight="Bold"
+                               Foreground="#B39DDB" Margin="38,0,0,0" />
+                    <Border Height="1" Background="#33FFFFFF" Margin="0,16,0,0" />
+                </StackPanel>
+
+                <!-- Version info at bottom -->
+                <TextBlock DockPanel.Dock="Bottom" Text="v1.0 | .NET 8" FontSize="11"
+                           Foreground="#44FFFFFF" Margin="20,0,0,16"
+                           VerticalAlignment="Bottom" />
+
+                <!-- Navigation -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="8,0">
+                        <TextBlock Text="MEDIA" FontSize="10" FontWeight="Bold"
+                                   Foreground="#55FFFFFF" Margin="16,8,0,6"
+ />
+
+                        <RadioButton Style="{StaticResource NavButton}"
+                                     IsChecked="{Binding IsVideoSelected}"
+                                     GroupName="Nav">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="VideoOutline" Width="20" Height="20"
+                                                         VerticalAlignment="Center" />
+                                <TextBlock Text="Video → MP3" Margin="12,0,0,0"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </RadioButton>
+
+                        <RadioButton Style="{StaticResource NavButton}"
+                                     IsChecked="{Binding IsAudioCutterSelected}"
+                                     GroupName="Nav">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="ContentCut" Width="20" Height="20"
+                                                         VerticalAlignment="Center" />
+                                <TextBlock Text="Audio Cutter" Margin="12,0,0,0"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </RadioButton>
+
+                        <RadioButton Style="{StaticResource NavButton}"
+                                     IsChecked="{Binding IsAudioConverterSelected}"
+                                     GroupName="Nav">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="SwapHorizontal" Width="20" Height="20"
+                                                         VerticalAlignment="Center" />
+                                <TextBlock Text="Audio Converter" Margin="12,0,0,0"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </RadioButton>
+
+                        <Border Height="1" Background="#15FFFFFF" Margin="12,10" />
+
+                        <TextBlock Text="DOKUMENTY" FontSize="10" FontWeight="Bold"
+                                   Foreground="#55FFFFFF" Margin="16,4,0,6"
+ />
+
+                        <RadioButton Style="{StaticResource NavButton}"
+                                     IsChecked="{Binding IsPdfMergeSelected}"
+                                     GroupName="Nav">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="FilePdfBox" Width="20" Height="20"
+                                                         VerticalAlignment="Center" />
+                                <TextBlock Text="PDF Merge" Margin="12,0,0,0"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </RadioButton>
+
+                        <RadioButton Style="{StaticResource NavButton}"
+                                     IsChecked="{Binding IsPdfSplitSelected}"
+                                     GroupName="Nav">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="CallSplit" Width="20" Height="20"
+                                                         VerticalAlignment="Center" />
+                                <TextBlock Text="PDF Split" Margin="12,0,0,0"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </RadioButton>
+
+                        <Border Height="1" Background="#15FFFFFF" Margin="12,10" />
+
+                        <TextBlock Text="OBRAZY" FontSize="10" FontWeight="Bold"
+                                   Foreground="#55FFFFFF" Margin="16,4,0,6"
+ />
+
+                        <RadioButton Style="{StaticResource NavButton}"
+                                     IsChecked="{Binding IsImageConverterSelected}"
+                                     GroupName="Nav">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="ImageOutline" Width="20" Height="20"
+                                                         VerticalAlignment="Center" />
+                                <TextBlock Text="Image Converter" Margin="12,0,0,0"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </RadioButton>
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- Content Area -->
+        <Grid Grid.Column="1" Margin="16">
+            <views:VideoConverterView Visibility="{Binding DataContext.IsVideoSelected, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}" />
+            <views:AudioCutterView Visibility="{Binding DataContext.IsAudioCutterSelected, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}" />
+            <views:AudioConverterView Visibility="{Binding DataContext.IsAudioConverterSelected, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}" />
+            <views:PdfMergerView Visibility="{Binding DataContext.IsPdfMergeSelected, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}" />
+            <views:PdfSplitterView Visibility="{Binding DataContext.IsPdfSplitSelected, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}" />
+            <views:ImageConverterView Visibility="{Binding DataContext.IsImageConverterSelected, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}" />
+        </Grid>
+    </Grid>
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Window.Resources>
+</Window>

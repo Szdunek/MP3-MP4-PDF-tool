@@ -1,0 +1,118 @@
+<UserControl x:Class="ConverterSplitter.Views.PdfSplitterView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:ConverterSplitter.ViewModels"
+             xmlns:conv="clr-namespace:ConverterSplitter.Converters">
+    <UserControl.DataContext>
+        <vm:PdfSplitterViewModel />
+    </UserControl.DataContext>
+    <UserControl.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+        <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis" />
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="8">
+            <TextBlock Text="PDF Split" Style="{StaticResource SectionTitle}" FontSize="24" />
+            <TextBlock Text="Split a PDF into individual pages or custom ranges."
+                       Foreground="#88FFFFFF" Margin="0,0,0,20" />
+
+            <!-- Drop Zone -->
+            <Border Style="{StaticResource DropZone}" AllowDrop="True"
+                    Drop="OnDrop" DragOver="OnDragOver"
+                    Visibility="{Binding IsFileLoaded, Converter={StaticResource InvBoolToVis}}">
+                <StackPanel HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="CallSplit" Width="48" Height="48"
+                                             HorizontalAlignment="Center" Foreground="#55FFFFFF" />
+                    <TextBlock Text="Drag &amp; drop a PDF file here" FontSize="16"
+                               Foreground="#88FFFFFF" HorizontalAlignment="Center" Margin="0,12,0,8" />
+                    <Button Content="Browse PDF" Command="{Binding BrowseFileCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            HorizontalAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+            <!-- File loaded view -->
+            <StackPanel Visibility="{Binding IsFileLoaded, Converter={StaticResource BoolToVis}}">
+                <!-- File Info -->
+                <Border Style="{StaticResource CardBorder}" Margin="0,0,0,8" Padding="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="{Binding FileName}" FontSize="16" FontWeight="SemiBold" Foreground="#E0E0E0" />
+                            <TextBlock Foreground="#88FFFFFF" FontSize="12" Margin="0,4,0,0">
+                                <Run Text="{Binding PageCount}" />
+                                <Run Text=" pages" />
+                            </TextBlock>
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Load Another"
+                                Command="{Binding BrowseFileCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}" />
+                    </Grid>
+                </Border>
+
+                <!-- Split Mode -->
+                <Border Style="{StaticResource CardBorder}" Margin="0,0,0,8" Padding="16">
+                    <StackPanel>
+                        <TextBlock Text="Split Mode" Style="{StaticResource SectionTitle}" FontSize="16" />
+
+                        <RadioButton IsChecked="{Binding SplitIntoPages}"
+                                     Margin="0,0,0,12" Foreground="#E0E0E0">
+                            <StackPanel>
+                                <TextBlock Text="Split into individual pages" FontSize="14" />
+                                <TextBlock Text="Each page becomes a separate PDF file"
+                                           Foreground="#55FFFFFF" FontSize="11" />
+                            </StackPanel>
+                        </RadioButton>
+
+                        <RadioButton Foreground="#E0E0E0">
+                            <StackPanel>
+                                <TextBlock Text="Split by custom ranges" FontSize="14" />
+                                <TextBlock Text="e.g. 1-3, 4-6, 7-10"
+                                           Foreground="#55FFFFFF" FontSize="11" />
+                            </StackPanel>
+                        </RadioButton>
+
+                        <TextBox Text="{Binding RangeText, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 materialDesign:HintAssist.Hint="Page ranges (e.g. 1-3, 4-6, 7-10)"
+                                 Margin="28,12,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Actions -->
+                <Grid Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="{Binding StatusText}" Foreground="#80CBC4"
+                               FontSize="13" VerticalAlignment="Center" />
+
+                    <Button Grid.Column="1" Command="{Binding ExtractPagesCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,0,8,0">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="FileDocumentOutline" VerticalAlignment="Center" />
+                            <TextBlock Text="Extract Pages" Margin="8,0,0,0" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Grid.Column="2" Command="{Binding SplitCommand}"
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            Background="#7E57C2" BorderBrush="#7E57C2">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="CallSplit" VerticalAlignment="Center" />
+                            <TextBlock Text="Split PDF" Margin="8,0,0,0" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
