@@ -18,6 +18,10 @@
         TextOptions.TextRenderingMode="Auto"
         FontFamily="{materialDesign:MaterialDesignFont}">
 
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Window.Resources>
+
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
@@ -44,10 +48,33 @@
                     <Border Height="1" Background="#33FFFFFF" Margin="0,16,0,0" />
                 </StackPanel>
 
-                <!-- Version info at bottom -->
-                <TextBlock DockPanel.Dock="Bottom" Text="v1.0 | .NET 8" FontSize="11"
-                           Foreground="#44FFFFFF" Margin="20,0,0,16"
-                           VerticalAlignment="Bottom" />
+                <!-- Update banner + version at bottom -->
+                <StackPanel DockPanel.Dock="Bottom" Margin="8,0,8,12">
+                    <!-- Update Available Banner -->
+                    <Button Command="{Binding ShowUpdateCommand}"
+                            Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BoolToVis}}"
+                            Cursor="Hand" Margin="0,0,0,8"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            HorizontalContentAlignment="Stretch" Padding="0">
+                        <Border Background="#1A80CBC4" CornerRadius="8" Padding="12,8">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="ArrowUpBoldCircleOutline" Width="18" Height="18"
+                                                         Foreground="#80CBC4" VerticalAlignment="Center" />
+                                <StackPanel Margin="8,0,0,0">
+                                    <TextBlock Text="Update available" FontSize="12"
+                                               Foreground="#80CBC4" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding UpdateVersionText}" FontSize="10"
+                                               Foreground="#5580CBC4" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </Button>
+
+                    <TextBlock FontSize="11" Foreground="#44FFFFFF" Margin="12,0,0,0">
+                        <Run Text="{Binding CurrentVersionText, Mode=OneWay}" />
+                        <Run Text=" | &#169; DogSoft" />
+                    </TextBlock>
+                </StackPanel>
 
                 <!-- Navigation -->
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -149,7 +176,5 @@
         </Grid>
     </Grid>
 
-    <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
-    </Window.Resources>
+
 </Window>
