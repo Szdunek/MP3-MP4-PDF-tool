@@ -3,10 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:vm="clr-namespace:ConverterSplitter.ViewModels"
-             xmlns:conv="clr-namespace:ConverterSplitter.Converters">
-    <UserControl.DataContext>
-        <vm:PdfSplitterViewModel />
-    </UserControl.DataContext>
+             xmlns:svc="clr-namespace:ConverterSplitter.Services"
+             xmlns:conv="clr-namespace:ConverterSplitter.Converters"
+    >
+    <UserControl.DataContext><vm:PdfSplitterViewModel /></UserControl.DataContext>
     <UserControl.Resources>
         <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
         <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis" />
@@ -14,101 +14,280 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="8">
-            <TextBlock Text="PDF Split" Style="{StaticResource SectionTitle}" FontSize="24" />
-            <TextBlock Text="Split a PDF into individual pages or custom ranges."
+            <TextBlock Text="{Binding [split_title], Source={x:Static svc:Loc.I}, Mode=OneWay}"
+                       Style="{StaticResource SectionTitle}" FontSize="24" />
+            <TextBlock Text="{Binding [split_desc], Source={x:Static svc:Loc.I}, Mode=OneWay}"
                        Foreground="#88FFFFFF" Margin="0,0,0,20" />
 
-            <!-- Drop Zone -->
-            <Border Style="{StaticResource DropZone}" AllowDrop="True"
-                    Drop="OnDrop" DragOver="OnDragOver"
+            <!-- Drop zone -->
+            <Border Style="{StaticResource DropZone}" Drop="OnDrop" DragOver="OnDragOver"
                     Visibility="{Binding IsFileLoaded, Converter={StaticResource InvBoolToVis}}">
                 <StackPanel HorizontalAlignment="Center">
                     <materialDesign:PackIcon Kind="CallSplit" Width="48" Height="48"
                                              HorizontalAlignment="Center" Foreground="#55FFFFFF" />
-                    <TextBlock Text="Drag &amp; drop a PDF file here" FontSize="16"
-                               Foreground="#88FFFFFF" HorizontalAlignment="Center" Margin="0,12,0,8" />
-                    <Button Content="Browse PDF" Command="{Binding BrowseFileCommand}"
-                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                            HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding [drag_pdf_single], Source={x:Static svc:Loc.I}, Mode=OneWay}"
+                               FontSize="16" Foreground="#88FFFFFF" HorizontalAlignment="Center" Margin="0,12,0,8" />
+                    <Button Content="{Binding [browse_pdf], Source={x:Static svc:Loc.I}, Mode=OneWay}"
+                            Command="{Binding BrowseFileCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}" HorizontalAlignment="Center" />
                 </StackPanel>
             </Border>
 
-            <!-- File loaded view -->
+            <!-- ═══ Loaded file ═══ -->
             <StackPanel Visibility="{Binding IsFileLoaded, Converter={StaticResource BoolToVis}}">
-                <!-- File Info -->
-                <Border Style="{StaticResource CardBorder}" Margin="0,0,0,8" Padding="16">
+
+                <!-- File info bar -->
+                <Border Style="{StaticResource CardBorder}" Padding="16" Margin="0,0,0,6">
                     <Grid>
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <StackPanel>
-                            <TextBlock Text="{Binding FileName}" FontSize="16" FontWeight="SemiBold" Foreground="#E0E0E0" />
-                            <TextBlock Foreground="#88FFFFFF" FontSize="12" Margin="0,4,0,0">
-                                <Run Text="{Binding PageCount}" />
-                                <Run Text=" pages" />
-                            </TextBlock>
+                        <Border Background="#2A1F3E" CornerRadius="8" Padding="10" Margin="0,0,14,0">
+                            <materialDesign:PackIcon Kind="FilePdfBox" Width="24" Height="24" Foreground="#EF5350" />
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding FileName}" FontSize="15" FontWeight="SemiBold" Foreground="#E0E0E0" />
+                            <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                <materialDesign:PackIcon Kind="FileDocumentMultipleOutline" Width="14" Height="14"
+                                                         Foreground="#88FFFFFF" VerticalAlignment="Center" Margin="0,0,4,0" />
+                                <TextBlock Foreground="#88FFFFFF" FontSize="12">
+                                    <Run Text="{Binding PageCount, Mode=OneWay}" />
+                                    <Run Text="{Binding [pages], Source={x:Static svc:Loc.I}, Mode=OneWay}" />
+                                </TextBlock>
+                            </StackPanel>
                         </StackPanel>
-                        <Button Grid.Column="1" Content="Load Another"
-                                Command="{Binding BrowseFileCommand}"
+                        <Button Grid.Column="2" Command="{Binding BrowseFileCommand}"
+                                Content="{Binding [load_another], Source={x:Static svc:Loc.I}, Mode=OneWay}"
                                 Style="{StaticResource MaterialDesignOutlinedButton}" />
                     </Grid>
                 </Border>
 
-                <!-- Split Mode -->
-                <Border Style="{StaticResource CardBorder}" Margin="0,0,0,8" Padding="16">
+                <!-- ═══ Split Mode Selection ═══ -->
+                <Border Style="{StaticResource CardBorder}" Padding="18" Margin="0,0,0,6">
                     <StackPanel>
-                        <TextBlock Text="Split Mode" Style="{StaticResource SectionTitle}" FontSize="16" />
+                        <TextBlock Text="{Binding [split_mode], Source={x:Static svc:Loc.I}, Mode=OneWay}"
+                                   Style="{StaticResource SectionTitle}" FontSize="16" Margin="0,0,0,12" />
 
-                        <RadioButton IsChecked="{Binding SplitIntoPages}"
-                                     Margin="0,0,0,12" Foreground="#E0E0E0">
-                            <StackPanel>
-                                <TextBlock Text="Split into individual pages" FontSize="14" />
-                                <TextBlock Text="Each page becomes a separate PDF file"
-                                           Foreground="#55FFFFFF" FontSize="11" />
+                        <!-- Mode 0: Split all pages -->
+                        <RadioButton IsChecked="True"
+                                     GroupName="SplitMode" Margin="0,0,0,10" Foreground="#E0E0E0"
+                                     Tag="0" Checked="OnSplitModeChecked">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="BookOpenPageVariantOutline" Width="20" Height="20"
+                                                         Foreground="#B39DDB" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                <StackPanel>
+                                    <TextBlock Text="{Binding [split_mode_pages], Source={x:Static svc:Loc.I}, Mode=OneWay}"
+                                               FontSize="14" Foreground="#E0E0E0" />
+                                    <TextBlock Text="{Binding [split_mode_pages_desc], Source={x:Static svc:Loc.I}, Mode=OneWay}"
+                                               Foreground="#55FFFFFF" FontSize="11" />
+                                </StackPanel>
                             </StackPanel>
                         </RadioButton>
 
-                        <RadioButton Foreground="#E0E0E0">
-                            <StackPanel>
-                                <TextBlock Text="Split by custom ranges" FontSize="14" />
-                                <TextBlock Text="e.g. 1-3, 4-6, 7-10"
-                                           Foreground="#55FFFFFF" FontSize="11" />
+                        <!-- Mode 1: Custom ranges -->
+                        <RadioButton GroupName="SplitMode" Margin="0,0,0,10" Foreground="#E0E0E0"
+                                     Tag="1" Checked="OnSplitModeChecked">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="FormatListNumbered" Width="20" Height="20"
+                                                         Foreground="#80CBC4" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                <StackPanel>
+                                    <TextBlock Text="{Binding [split_mode_ranges], Source={x:Static svc:Loc.I}, Mode=OneWay}"
+                                               FontSize="14" Foreground="#E0E0E0" />
+                                    <TextBlock Text="{Binding [split_mode_ranges_desc], Source={x:Static svc:Loc.I}, Mode=OneWay}"
+                                               Foreground="#55FFFFFF" FontSize="11" />
+                                </StackPanel>
                             </StackPanel>
                         </RadioButton>
 
+                        <!-- Mode 2: Pick individual pages -->
+                        <RadioButton GroupName="SplitMode" Foreground="#E0E0E0"
+                                     Tag="2" Checked="OnSplitModeChecked">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="CursorDefaultClickOutline" Width="20" Height="20"
+                                                         Foreground="#FFB74D" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                <StackPanel>
+                                    <TextBlock FontSize="14" Foreground="#E0E0E0"
+                                               Text="Pick pages / Wybierz strony" />
+                                    <TextBlock Foreground="#55FFFFFF" FontSize="11"
+                                               Text="Click pages below to select / Kliknij strony poniżej" />
+                                </StackPanel>
+                            </StackPanel>
+                        </RadioButton>
+
+                        <!-- Range input (visible for mode 1) -->
                         <TextBox Text="{Binding RangeText, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 materialDesign:HintAssist.Hint="Page ranges (e.g. 1-3, 4-6, 7-10)"
-                                 Margin="28,12,0,0" />
+                                 materialDesign:HintAssist.Hint="{Binding [split_ranges_hint], Source={x:Static svc:Loc.I}, Mode=OneWay}"
+                                 Margin="0,14,0,0" FontSize="14" />
                     </StackPanel>
                 </Border>
 
-                <!-- Actions -->
+                <!-- ═══ Page Grid ═══ -->
+                <Border Style="{StaticResource CardBorder}" Padding="18" Margin="0,0,0,6">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding [split_page_overview], Source={x:Static svc:Loc.I}, Mode=OneWay}"
+                                       Style="{StaticResource SectionTitle}" FontSize="16" Margin="0" />
+                            <Button Grid.Column="1" Content="Select All" Command="{Binding SelectAllCommand}"
+                                    Style="{StaticResource MaterialDesignFlatButton}" FontSize="11"
+                                    Foreground="#88FFFFFF" Padding="8,4" Height="28" Margin="0,0,4,0" />
+                            <Button Grid.Column="2" Content="None" Command="{Binding SelectNoneCommand}"
+                                    Style="{StaticResource MaterialDesignFlatButton}" FontSize="11"
+                                    Foreground="#88FFFFFF" Padding="8,4" Height="28" />
+                        </Grid>
+
+                        <ItemsControl ItemsSource="{Binding Pages}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding DataContext.TogglePageCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource MaterialDesignFlatButton}"
+                                            Padding="0" Margin="3" Width="58" Height="72"
+                                            Cursor="Hand">
+                                        <Border CornerRadius="8" Width="58" Height="72">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#1A1A2E" />
+                                                    <Setter Property="BorderBrush" Value="#22FFFFFF" />
+                                                    <Setter Property="BorderThickness" Value="1.5" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                            <Setter Property="Background" Value="#2A1F4E" />
+                                                            <Setter Property="BorderBrush" Value="#B39DDB" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <Grid>
+                                                <!-- Page visual -->
+                                                <Border Background="#15FFFFFF" CornerRadius="4"
+                                                        Width="32" Height="40" Margin="0,4,0,0"
+                                                        VerticalAlignment="Top" HorizontalAlignment="Center">
+                                                    <Grid>
+                                                        <Border Background="#0DFFFFFF" CornerRadius="2"
+                                                                Width="24" Height="2" VerticalAlignment="Top" Margin="0,8,0,0" />
+                                                        <Border Background="#0DFFFFFF" CornerRadius="2"
+                                                                Width="24" Height="2" VerticalAlignment="Top" Margin="0,14,0,0" />
+                                                        <Border Background="#0DFFFFFF" CornerRadius="2"
+                                                                Width="24" Height="2" VerticalAlignment="Top" Margin="0,20,0,0" />
+                                                        <Border Background="#0DFFFFFF" CornerRadius="2"
+                                                                Width="16" Height="2" VerticalAlignment="Top" Margin="0,26,0,0"
+                                                                HorizontalAlignment="Left" />
+                                                    </Grid>
+                                                </Border>
+                                                <!-- Page number -->
+                                                <TextBlock Text="{Binding Number, Mode=OneWay}" FontSize="12" FontWeight="Bold"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                                                           Margin="0,0,0,5">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="#55FFFFFF" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#B39DDB" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <!-- Checkmark -->
+                                                <materialDesign:PackIcon Kind="CheckCircle" Width="14" Height="14"
+                                                                         Foreground="#80CBC4"
+                                                                         HorizontalAlignment="Right" VerticalAlignment="Top"
+                                                                         Margin="0,2,2,0">
+                                                    <materialDesign:PackIcon.Style>
+                                                        <Style TargetType="materialDesign:PackIcon">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </materialDesign:PackIcon.Style>
+                                                </materialDesign:PackIcon>
+                                            </Grid>
+                                        </Border>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- ═══ Actions ═══ -->
                 <Grid Margin="0,8,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="{Binding StatusText}" Foreground="#80CBC4"
-                               FontSize="13" VerticalAlignment="Center" />
-
-                    <Button Grid.Column="1" Command="{Binding ExtractPagesCommand}"
-                            Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,0,8,0">
+                    <StackPanel VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="FileDocumentOutline" VerticalAlignment="Center" />
-                            <TextBlock Text="Extract Pages" Margin="8,0,0,0" />
+                            <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                         Width="16" Height="16" IsIndeterminate="True" Foreground="#B39DDB"
+                                         Margin="0,0,8,0"
+                                         Visibility="{Binding IsSplitting, Converter={StaticResource BoolToVis}}" />
+                            <materialDesign:PackIcon Kind="CheckCircleOutline" Width="16" Height="16"
+                                                     Foreground="#80CBC4" Margin="0,0,8,0"
+                                                     Visibility="{Binding ShowOpenButtons, Converter={StaticResource BoolToVis}}" />
+                            <TextBlock Text="{Binding StatusText}" Foreground="#80CBC4" FontSize="13"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Button Grid.Column="1" Command="{Binding OpenFolderCommand}"
+                            Visibility="{Binding ShowOpenButtons, Converter={StaticResource BoolToVis}}"
+                            Style="{StaticResource OpenButton}" Margin="0,0,4,0">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="FolderOpenOutline" Width="16" Height="16"
+                                                     VerticalAlignment="Center" Margin="0,0,4,0" />
+                            <TextBlock Text="{Binding [open_folder], Source={x:Static svc:Loc.I}, Mode=OneWay}"
+                                       VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
 
-                    <Button Grid.Column="2" Command="{Binding SplitCommand}"
-                            Style="{StaticResource MaterialDesignRaisedButton}"
-                            Background="#7E57C2" BorderBrush="#7E57C2">
+                    <Button Grid.Column="2" Command="{Binding OpenFileCommand}"
+                            Visibility="{Binding ShowOpenButtons, Converter={StaticResource BoolToVis}}"
+                            Style="{StaticResource OpenButton}" Margin="0,0,8,0">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="FileOutline" Width="16" Height="16"
+                                                     VerticalAlignment="Center" Margin="0,0,4,0" />
+                            <TextBlock Text="{Binding [open_file], Source={x:Static svc:Loc.I}, Mode=OneWay}"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Grid.Column="3" Command="{Binding ExtractPagesCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,0,8,0">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="FileDocumentArrowRightOutline" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding [split_extract], Source={x:Static svc:Loc.I}, Mode=OneWay}"
+                                       Margin="8,0,0,0" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Grid.Column="4" Command="{Binding SplitCommand}"
+                            Style="{StaticResource GlowButton}">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="CallSplit" VerticalAlignment="Center" />
-                            <TextBlock Text="Split PDF" Margin="8,0,0,0" />
+                            <TextBlock Text="{Binding [split_btn], Source={x:Static svc:Loc.I}, Mode=OneWay}"
+                                       Margin="8,0,0,0" />
                         </StackPanel>
                     </Button>
                 </Grid>

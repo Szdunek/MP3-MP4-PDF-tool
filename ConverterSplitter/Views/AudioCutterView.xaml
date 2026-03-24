@@ -4,10 +4,9 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:vm="clr-namespace:ConverterSplitter.ViewModels"
              xmlns:ctrl="clr-namespace:ConverterSplitter.Controls"
+             xmlns:svc="clr-namespace:ConverterSplitter.Services"
              xmlns:conv="clr-namespace:ConverterSplitter.Converters">
-    <UserControl.DataContext>
-        <vm:AudioCutterViewModel />
-    </UserControl.DataContext>
+    <UserControl.DataContext><vm:AudioCutterViewModel /></UserControl.DataContext>
     <UserControl.Resources>
         <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
         <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis" />
@@ -16,186 +15,106 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="8">
-            <!-- Header -->
-            <TextBlock Text="Audio Cutter" Style="{StaticResource SectionTitle}" FontSize="24" />
-            <TextBlock Text="Load an audio file, select a region, and export the cut segment."
-                       Foreground="#88FFFFFF" Margin="0,0,0,20" />
+            <TextBlock Text="{Binding [cutter_title], Source={x:Static svc:Loc.I}, Mode=OneWay}" Style="{StaticResource SectionTitle}" FontSize="24" />
+            <TextBlock Text="{Binding [cutter_desc], Source={x:Static svc:Loc.I}, Mode=OneWay}" Foreground="#88FFFFFF" Margin="0,0,0,20" />
 
-            <!-- Drop Zone (when no file loaded) -->
-            <Border Style="{StaticResource DropZone}" AllowDrop="True"
-                    Drop="OnDrop" DragOver="OnDragOver"
+            <Border Style="{StaticResource DropZone}" Drop="OnDrop" DragOver="OnDragOver"
                     Visibility="{Binding IsFileLoaded, Converter={StaticResource InvBoolToVis}}">
                 <StackPanel HorizontalAlignment="Center">
-                    <materialDesign:PackIcon Kind="MusicNoteOutline" Width="48" Height="48"
-                                             HorizontalAlignment="Center" Foreground="#55FFFFFF" />
-                    <TextBlock Text="Drag &amp; drop an audio file here" FontSize="16"
-                               Foreground="#88FFFFFF" HorizontalAlignment="Center" Margin="0,12,0,8" />
-                    <Button Content="Browse File" Command="{Binding BrowseFileCommand}"
-                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                            HorizontalAlignment="Center" />
+                    <materialDesign:PackIcon Kind="MusicNoteOutline" Width="48" Height="48" HorizontalAlignment="Center" Foreground="#55FFFFFF" />
+                    <TextBlock Text="{Binding [drag_audio_single], Source={x:Static svc:Loc.I}, Mode=OneWay}" FontSize="16" Foreground="#88FFFFFF" HorizontalAlignment="Center" Margin="0,12,0,8" />
+                    <Button Content="{Binding [browse_file], Source={x:Static svc:Loc.I}, Mode=OneWay}" Command="{Binding BrowseFileCommand}" Style="{StaticResource MaterialDesignOutlinedButton}" HorizontalAlignment="Center" />
                 </StackPanel>
             </Border>
 
-            <!-- Audio Editor (when file loaded) -->
             <StackPanel Visibility="{Binding IsFileLoaded, Converter={StaticResource BoolToVis}}">
-                <!-- File Info -->
                 <Border Style="{StaticResource CardBorder}" Margin="0,0,0,8" Padding="16">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                         <StackPanel>
                             <TextBlock Text="{Binding FileName}" FontSize="16" FontWeight="SemiBold" Foreground="#E0E0E0" />
                             <TextBlock Foreground="#88FFFFFF" FontSize="12" Margin="0,4,0,0">
-                                <Run Text="Duration: " />
+                                <Run Text="{Binding [cutter_duration], Source={x:Static svc:Loc.I}, Mode=OneWay}" />
                                 <Run Text="{Binding Duration, Converter={StaticResource TimeConv}, Mode=OneWay}" />
                             </TextBlock>
                         </StackPanel>
-                        <Button Grid.Column="1" Content="Load Another"
-                                Command="{Binding BrowseFileCommand}"
-                                Style="{StaticResource MaterialDesignOutlinedButton}" />
+                        <Button Grid.Column="1" Content="{Binding [load_another], Source={x:Static svc:Loc.I}, Mode=OneWay}" Command="{Binding BrowseFileCommand}" Style="{StaticResource MaterialDesignOutlinedButton}" />
                     </Grid>
                 </Border>
 
-                <!-- Waveform -->
                 <Border Style="{StaticResource CardBorder}" Margin="0,0,0,8" Padding="16">
                     <StackPanel>
-                        <TextBlock Text="Waveform" Foreground="#88FFFFFF" FontSize="12" Margin="0,0,0,8" />
-                        <ctrl:WaveformControl
-                            Height="120"
-                            WaveformData="{Binding WaveformData}"
-                            Duration="{Binding Duration}"
-                            CurrentPosition="{Binding CurrentPositionSeconds}"
-                            SelectionStart="{Binding SelectionStartSeconds, Mode=TwoWay}"
-                            SelectionEnd="{Binding SelectionEndSeconds, Mode=TwoWay}"
-                            WaveColor="#B39DDB"
-                            SelectionColor="#4DB39DDB"
-                            PositionColor="#80CBC4"
-                            Background="Transparent" />
-
-                        <!-- Time Display -->
+                        <TextBlock Text="{Binding [cutter_waveform], Source={x:Static svc:Loc.I}, Mode=OneWay}" Foreground="#88FFFFFF" FontSize="12" Margin="0,0,0,8" />
+                        <ctrl:WaveformControl Height="120" WaveformData="{Binding WaveformData}" Duration="{Binding Duration}"
+                            CurrentPosition="{Binding CurrentPositionSeconds}" SelectionStart="{Binding SelectionStartSeconds, Mode=TwoWay}"
+                            SelectionEnd="{Binding SelectionEndSeconds, Mode=TwoWay}" WaveColor="#B39DDB" SelectionColor="#4DB39DDB" PositionColor="#80CBC4" Background="Transparent" />
                         <Grid Margin="0,8,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Foreground="#88FFFFFF" FontSize="11">
-                                <Run Text="Start: " />
-                                <Run Text="{Binding SelectionStart, Converter={StaticResource TimeConv}, Mode=OneWay}" Foreground="#B39DDB" />
-                            </TextBlock>
-                            <TextBlock Grid.Column="1" HorizontalAlignment="Center" Foreground="#80CBC4" FontSize="13" FontWeight="SemiBold">
-                                <Run Text="{Binding CurrentPosition, Converter={StaticResource TimeConv}, Mode=OneWay}" />
-                            </TextBlock>
-                            <TextBlock Grid.Column="2" HorizontalAlignment="Right" Foreground="#88FFFFFF" FontSize="11">
-                                <Run Text="End: " />
-                                <Run Text="{Binding SelectionEnd, Converter={StaticResource TimeConv}, Mode=OneWay}" Foreground="#B39DDB" />
-                            </TextBlock>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                            <TextBlock Foreground="#88FFFFFF" FontSize="11"><Run Text="Start: " /><Run Text="{Binding SelectionStart, Converter={StaticResource TimeConv}, Mode=OneWay}" Foreground="#B39DDB" /></TextBlock>
+                            <TextBlock Grid.Column="1" HorizontalAlignment="Center" Foreground="#80CBC4" FontSize="13" FontWeight="SemiBold" Text="{Binding CurrentPosition, Converter={StaticResource TimeConv}, Mode=OneWay}" />
+                            <TextBlock Grid.Column="2" HorizontalAlignment="Right" Foreground="#88FFFFFF" FontSize="11"><Run Text="End: " /><Run Text="{Binding SelectionEnd, Converter={StaticResource TimeConv}, Mode=OneWay}" Foreground="#B39DDB" /></TextBlock>
                         </Grid>
                     </StackPanel>
                 </Border>
 
-                <!-- Selection Controls -->
                 <Border Style="{StaticResource CardBorder}" Margin="0,0,0,8" Padding="16">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-
-                        <StackPanel Grid.Column="0" Grid.Row="0">
-                            <TextBlock Text="Selection Start (seconds)" Foreground="#88FFFFFF" FontSize="12" Margin="0,0,0,4" />
-                            <TextBox Text="{Binding SelectionStartSeconds, StringFormat=F2, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource MaterialDesignOutlinedTextBox}" />
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="1" Grid.Row="0" VerticalAlignment="Center" Margin="16,16,16,0">
-                            <TextBlock Text="{Binding SelectionDuration, Converter={StaticResource TimeConv}, Mode=OneWay}"
-                                       HorizontalAlignment="Center" Foreground="#80CBC4" FontSize="14" FontWeight="Bold" />
-                            <TextBlock Text="Selection" HorizontalAlignment="Center" Foreground="#55FFFFFF" FontSize="10" />
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="2" Grid.Row="0">
-                            <TextBlock Text="Selection End (seconds)" Foreground="#88FFFFFF" FontSize="12" Margin="0,0,0,4" />
-                            <TextBox Text="{Binding SelectionEndSeconds, StringFormat=F2, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource MaterialDesignOutlinedTextBox}" />
-                        </StackPanel>
+                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <StackPanel><TextBlock Text="{Binding [cutter_start], Source={x:Static svc:Loc.I}, Mode=OneWay}" Foreground="#88FFFFFF" FontSize="12" Margin="0,0,0,4" />
+                            <TextBox Text="{Binding SelectionStartSeconds, StringFormat=F2, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource MaterialDesignOutlinedTextBox}" /></StackPanel>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="16,16,16,0">
+                            <TextBlock Text="{Binding SelectionDuration, Converter={StaticResource TimeConv}, Mode=OneWay}" HorizontalAlignment="Center" Foreground="#80CBC4" FontSize="14" FontWeight="Bold" />
+                            <TextBlock Text="{Binding [cutter_selection], Source={x:Static svc:Loc.I}, Mode=OneWay}" HorizontalAlignment="Center" Foreground="#55FFFFFF" FontSize="10" /></StackPanel>
+                        <StackPanel Grid.Column="2"><TextBlock Text="{Binding [cutter_end], Source={x:Static svc:Loc.I}, Mode=OneWay}" Foreground="#88FFFFFF" FontSize="12" Margin="0,0,0,4" />
+                            <TextBox Text="{Binding SelectionEndSeconds, StringFormat=F2, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource MaterialDesignOutlinedTextBox}" /></StackPanel>
                     </Grid>
                 </Border>
 
-                <!-- Playback Controls -->
                 <Border Style="{StaticResource CardBorder}" Margin="0,0,0,8" Padding="16">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Orientation="Horizontal" Grid.Column="0">
-                            <Button Command="{Binding PlayPauseCommand}"
-                                    Style="{StaticResource MaterialDesignIconButton}"
-                                    Foreground="#B39DDB" Width="48" Height="48">
-                                <materialDesign:PackIcon Width="28" Height="28">
-                                    <materialDesign:PackIcon.Style>
-                                        <Style TargetType="materialDesign:PackIcon">
-                                            <Setter Property="Kind" Value="Play" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsPlaying}" Value="True">
-                                                    <Setter Property="Kind" Value="Pause" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </materialDesign:PackIcon.Style>
-                                </materialDesign:PackIcon>
-                            </Button>
-                            <Button Command="{Binding StopCommand}"
-                                    Style="{StaticResource MaterialDesignIconButton}"
-                                    Foreground="#88FFFFFF" Width="40" Height="40">
-                                <materialDesign:PackIcon Kind="Stop" Width="24" Height="24" />
-                            </Button>
-                            <Button Command="{Binding PlaySelectionCommand}"
-                                    Style="{StaticResource MaterialDesignOutlinedButton}"
-                                    Content="Play Selection" Margin="8,0,0,0" />
-                        </StackPanel>
-
-                        <!-- Volume -->
-                        <StackPanel Grid.Column="2" Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="VolumeHigh" VerticalAlignment="Center"
-                                                     Foreground="#55FFFFFF" Margin="0,0,8,0" />
-                            <Slider Width="100" Minimum="0" Maximum="1" Value="{Binding Volume}"
-                                    VerticalAlignment="Center"
-                                    Foreground="#B39DDB" />
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <!-- Cut & Save -->
-                <Grid Margin="0,8,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding StatusText}" Foreground="#80CBC4" FontSize="13" />
-                        <ProgressBar Value="{Binding CutProgress}" Maximum="100" Height="4"
-                                     Margin="0,8,16,0" Foreground="#B39DDB"
-                                     Visibility="{Binding IsCutting, Converter={StaticResource BoolToVis}}" />
-                    </StackPanel>
-                    <Button Grid.Column="1" Command="{Binding CutAndSaveCommand}"
-                            Style="{StaticResource MaterialDesignRaisedButton}"
-                            Background="#7E57C2" BorderBrush="#7E57C2">
+                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                         <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="ContentCut" VerticalAlignment="Center" />
-                            <TextBlock Text="Cut &amp; Save" Margin="8,0,0,0" />
+                            <Button Command="{Binding PlayPauseCommand}" Style="{StaticResource MaterialDesignIconButton}" Foreground="#B39DDB" Width="48" Height="48">
+                                <materialDesign:PackIcon Width="28" Height="28"><materialDesign:PackIcon.Style>
+                                    <Style TargetType="materialDesign:PackIcon"><Setter Property="Kind" Value="Play" />
+                                        <Style.Triggers><DataTrigger Binding="{Binding IsPlaying}" Value="True"><Setter Property="Kind" Value="Pause" /></DataTrigger></Style.Triggers>
+                                    </Style></materialDesign:PackIcon.Style></materialDesign:PackIcon></Button>
+                            <Button Command="{Binding StopCommand}" Style="{StaticResource MaterialDesignIconButton}" Foreground="#88FFFFFF" Width="40" Height="40">
+                                <materialDesign:PackIcon Kind="Stop" Width="24" Height="24" /></Button>
+                            <Button Command="{Binding PlaySelectionCommand}" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    Content="{Binding [cutter_play_sel], Source={x:Static svc:Loc.I}, Mode=OneWay}" Margin="8,0,0,0" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="VolumeHigh" VerticalAlignment="Center" Foreground="#55FFFFFF" Margin="0,0,8,0" />
+                            <Slider Width="100" Minimum="0" Maximum="1" Value="{Binding Volume}" VerticalAlignment="Center" Foreground="#B39DDB" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Grid Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" Width="16" Height="16" IsIndeterminate="True" Foreground="#B39DDB" Margin="0,0,8,0" Visibility="{Binding IsCutting, Converter={StaticResource BoolToVis}}" />
+                            <materialDesign:PackIcon Kind="CheckCircleOutline" Width="16" Height="16" Foreground="#80CBC4" Margin="0,0,8,0" Visibility="{Binding ShowOpenButtons, Converter={StaticResource BoolToVis}}" />
+                            <TextBlock Text="{Binding StatusText}" Foreground="#80CBC4" FontSize="13" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <ProgressBar Value="{Binding CutProgress}" Maximum="100" Height="6" Margin="0,8,16,0" Style="{StaticResource AccentProgress}" Visibility="{Binding IsCutting, Converter={StaticResource BoolToVis}}" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Command="{Binding OpenFileCommand}"
+                            Visibility="{Binding ShowOpenButtons, Converter={StaticResource BoolToVis}}" Style="{StaticResource OpenButton}" Margin="0,0,4,0">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="FileOutline" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,4,0" />
+                            <TextBlock Text="{Binding [open_file], Source={x:Static svc:Loc.I}, Mode=OneWay}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
+                    <Button Grid.Column="2" Command="{Binding OpenFolderCommand}"
+                            Visibility="{Binding ShowOpenButtons, Converter={StaticResource BoolToVis}}" Style="{StaticResource OpenButton}" Margin="0,0,8,0">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="FolderOpenOutline" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,4,0" />
+                            <TextBlock Text="{Binding [open_folder], Source={x:Static svc:Loc.I}, Mode=OneWay}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="3" Command="{Binding CutAndSaveCommand}" Style="{StaticResource GlowButton}">
+                        <StackPanel Orientation="Horizontal"><materialDesign:PackIcon Kind="ContentCut" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding [cutter_cut_save], Source={x:Static svc:Loc.I}, Mode=OneWay}" Margin="8,0,0,0" /></StackPanel></Button>
                 </Grid>
             </StackPanel>
         </StackPanel>

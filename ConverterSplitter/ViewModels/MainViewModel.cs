@@ -1,4 +1,3 @@
-using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ConverterSplitter.Services;
@@ -18,6 +17,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _isUpdateAvailable;
     [ObservableProperty] private string _updateVersionText = "";
     [ObservableProperty] private string _currentVersionText = "";
+    [ObservableProperty] private string _languageLabel = "";
 
     private UpdateInfo? _latestUpdateInfo;
 
@@ -25,6 +25,7 @@ public partial class MainViewModel : ObservableObject
     {
         var ver = UpdateService.GetCurrentVersion();
         CurrentVersionText = $"v{ver.ToString(3)}";
+        LanguageLabel = Loc.I.CurrentLanguage.ToUpperInvariant();
         _ = CheckForUpdateAsync();
     }
 
@@ -37,19 +38,25 @@ public partial class MainViewModel : ObservableObject
             {
                 _latestUpdateInfo = info;
                 IsUpdateAvailable = true;
-                UpdateVersionText = $"v{info.LatestVersion.ToString(3)} available";
+                UpdateVersionText = $"v{info.LatestVersion.ToString(3)}";
             }
         }
-        catch { /* silently ignore update check failures */ }
+        catch { }
     }
 
     [RelayCommand]
     private void ShowUpdate()
     {
         if (_latestUpdateInfo == null) return;
-
         var window = new UpdateWindow(_latestUpdateInfo);
         window.Owner = System.Windows.Application.Current.MainWindow;
         window.ShowDialog();
+    }
+
+    [RelayCommand]
+    private void ToggleLanguage()
+    {
+        Loc.I.ToggleLanguage();
+        LanguageLabel = Loc.I.CurrentLanguage.ToUpperInvariant();
     }
 }

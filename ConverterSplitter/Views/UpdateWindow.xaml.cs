@@ -17,18 +17,17 @@ public partial class UpdateWindow : Window
         CurrentVersionText.Text = $"v{updateInfo.CurrentVersion.ToString(3)}";
         LatestVersionText.Text = $"v{updateInfo.LatestVersion.ToString(3)}";
         ReleaseNameText.Text = updateInfo.ReleaseName;
-        ReleaseDateText.Text = $"Released: {updateInfo.PublishedAt:yyyy-MM-dd}";
+        ReleaseDateText.Text = $"{Loc.I["update_released"]} {updateInfo.PublishedAt:yyyy-MM-dd}";
 
         if (updateInfo.DownloadSize > 0)
         {
             var sizeMb = updateInfo.DownloadSize / (1024.0 * 1024);
-            UpdateButtonText.Text = $"Download & Install ({sizeMb:F0} MB)";
+            UpdateButtonText.Text = $"{Loc.I["update_download_install"]} ({sizeMb:F0} MB)";
         }
 
         if (string.IsNullOrEmpty(updateInfo.DownloadUrl))
         {
             UpdateButton.IsEnabled = false;
-            UpdateButton.ToolTip = "No download available for this platform";
         }
     }
 
@@ -54,23 +53,19 @@ public partial class UpdateWindow : Window
         }
         catch (OperationCanceledException)
         {
-            ProgressText.Text = "Update cancelled.";
+            ProgressText.Text = Loc.I["update_cancelled"];
             ResetButtons();
         }
         catch (Exception ex)
         {
-            ProgressText.Text = $"Update failed: {ex.Message}";
+            ProgressText.Text = $"{Loc.I["update_failed"]} {ex.Message}";
             ResetButtons();
         }
     }
 
     private void OnGithubClick(object sender, RoutedEventArgs e)
     {
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = _updateInfo.ReleaseUrl,
-            UseShellExecute = true
-        });
+        Process.Start(new ProcessStartInfo(_updateInfo.ReleaseUrl) { UseShellExecute = true });
     }
 
     private void OnLaterClick(object sender, RoutedEventArgs e)

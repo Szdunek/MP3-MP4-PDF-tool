@@ -2,7 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        Title="Update Available"
+        xmlns:svc="clr-namespace:ConverterSplitter.Services"
+        Title="{Binding [update_title], Source={x:Static svc:Loc.I}, Mode=OneWay}"
         Height="380" Width="520"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
@@ -12,15 +13,13 @@
 
     <Grid Margin="32">
         <StackPanel VerticalAlignment="Center">
-            <!-- Header -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                 <materialDesign:PackIcon Kind="Update" Width="32" Height="32"
                                          Foreground="#80CBC4" VerticalAlignment="Center" />
-                <TextBlock Text="Update Available!" FontSize="22" FontWeight="Bold"
+                <TextBlock Text="{Binding [update_title], Source={x:Static svc:Loc.I}, Mode=OneWay}" FontSize="22" FontWeight="Bold"
                            Foreground="#E0E0E0" Margin="12,0,0,0" VerticalAlignment="Center" />
             </StackPanel>
 
-            <!-- Version Info -->
             <Border Background="#15FFFFFF" CornerRadius="8" Padding="16" Margin="0,0,0,16">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -29,33 +28,30 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                        <TextBlock Text="Current" Foreground="#55FFFFFF" FontSize="11" HorizontalAlignment="Center" />
+                        <TextBlock Text="{Binding [update_current], Source={x:Static svc:Loc.I}, Mode=OneWay}" Foreground="#55FFFFFF" FontSize="11" HorizontalAlignment="Center" />
                         <TextBlock x:Name="CurrentVersionText" Text="1.0.0" FontSize="18" FontWeight="Bold"
                                    Foreground="#88FFFFFF" HorizontalAlignment="Center" />
                     </StackPanel>
                     <materialDesign:PackIcon Grid.Column="1" Kind="ArrowRight" Width="24" Height="24"
                                              Foreground="#80CBC4" VerticalAlignment="Center" Margin="16,8,16,0" />
                     <StackPanel Grid.Column="2" HorizontalAlignment="Center">
-                        <TextBlock Text="Latest" Foreground="#55FFFFFF" FontSize="11" HorizontalAlignment="Center" />
+                        <TextBlock Text="{Binding [update_latest], Source={x:Static svc:Loc.I}, Mode=OneWay}" Foreground="#55FFFFFF" FontSize="11" HorizontalAlignment="Center" />
                         <TextBlock x:Name="LatestVersionText" Text="1.1.0" FontSize="18" FontWeight="Bold"
                                    Foreground="#80CBC4" HorizontalAlignment="Center" />
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- Release Name -->
             <TextBlock x:Name="ReleaseNameText" Text="" TextWrapping="Wrap"
                        TextAlignment="Center" Foreground="#88FFFFFF" FontSize="13" Margin="0,0,0,4" />
             <TextBlock x:Name="ReleaseDateText" Text="" TextAlignment="Center"
                        Foreground="#55FFFFFF" FontSize="11" Margin="0,0,0,16" />
 
-            <!-- Progress -->
             <ProgressBar x:Name="ProgressBar" Height="8" Value="0" Maximum="100"
                          Foreground="#80CBC4" Visibility="Collapsed" Margin="0,0,0,4" />
             <TextBlock x:Name="ProgressText" Text="" FontSize="11"
                        Foreground="#80CBC4" HorizontalAlignment="Center" Margin="0,0,0,12" />
 
-            <!-- Buttons -->
             <StackPanel x:Name="ButtonPanel" Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button x:Name="UpdateButton" Click="OnUpdateClick"
                         Style="{StaticResource MaterialDesignRaisedButton}"
@@ -63,13 +59,13 @@
                         Margin="0,0,8,0" Padding="20,8">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Download" VerticalAlignment="Center" />
-                        <TextBlock x:Name="UpdateButtonText" Text="Download &amp; Install" Margin="8,0,0,0" />
+                        <TextBlock x:Name="UpdateButtonText" Text="{Binding [update_download_install], Source={x:Static svc:Loc.I}, Mode=OneWay}" Margin="8,0,0,0" />
                     </StackPanel>
                 </Button>
-                <Button x:Name="GithubButton" Content="View on GitHub" Click="OnGithubClick"
+                <Button x:Name="GithubButton" Content="{Binding [update_view_github], Source={x:Static svc:Loc.I}, Mode=OneWay}" Click="OnGithubClick"
                         Style="{StaticResource MaterialDesignOutlinedButton}"
                         Margin="0,0,8,0" Padding="16,8" />
-                <Button x:Name="LaterButton" Content="Later" Click="OnLaterClick"
+                <Button x:Name="LaterButton" Content="{Binding [update_later], Source={x:Static svc:Loc.I}, Mode=OneWay}" Click="OnLaterClick"
                         Style="{StaticResource MaterialDesignFlatButton}"
                         Padding="16,8" />
             </StackPanel>

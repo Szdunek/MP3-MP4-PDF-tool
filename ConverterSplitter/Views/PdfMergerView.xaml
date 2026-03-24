@@ -3,114 +3,112 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:vm="clr-namespace:ConverterSplitter.ViewModels"
+             xmlns:svc="clr-namespace:ConverterSplitter.Services"
              xmlns:conv="clr-namespace:ConverterSplitter.Converters">
-    <UserControl.DataContext>
-        <vm:PdfMergerViewModel />
-    </UserControl.DataContext>
+    <UserControl.DataContext><vm:PdfMergerViewModel /></UserControl.DataContext>
     <UserControl.Resources>
         <conv:FileSizeConverter x:Key="FileSizeConv" />
         <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
-        <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis" />
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="8">
-            <TextBlock Text="PDF Merge" Style="{StaticResource SectionTitle}" FontSize="24" />
-            <TextBlock Text="Combine multiple PDF files into one. Drag to reorder."
-                       Foreground="#88FFFFFF" Margin="0,0,0,20" />
+            <TextBlock Text="{Binding [merge_title], Source={x:Static svc:Loc.I}, Mode=OneWay}" Style="{StaticResource SectionTitle}" FontSize="24" />
+            <TextBlock Text="{Binding [merge_desc], Source={x:Static svc:Loc.I}, Mode=OneWay}" Foreground="#88FFFFFF" Margin="0,0,0,20" />
 
-            <!-- Drop Zone -->
-            <Border Style="{StaticResource DropZone}" AllowDrop="True"
-                    Drop="OnDrop" DragOver="OnDragOver">
+            <Border Style="{StaticResource DropZone}" Drop="OnDrop" DragOver="OnDragOver">
                 <StackPanel HorizontalAlignment="Center">
-                    <materialDesign:PackIcon Kind="FilePdfBox" Width="48" Height="48"
-                                             HorizontalAlignment="Center" Foreground="#55FFFFFF" />
-                    <TextBlock Text="Drag &amp; drop PDF files here" FontSize="16"
-                               Foreground="#88FFFFFF" HorizontalAlignment="Center" Margin="0,12,0,8" />
-                    <Button Content="Browse PDFs" Command="{Binding BrowseFilesCommand}"
-                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                            HorizontalAlignment="Center" />
+                    <materialDesign:PackIcon Kind="FilePdfBox" Width="48" Height="48" HorizontalAlignment="Center" Foreground="#55FFFFFF" />
+                    <TextBlock Text="{Binding [drag_pdf], Source={x:Static svc:Loc.I}, Mode=OneWay}" FontSize="16" Foreground="#88FFFFFF" HorizontalAlignment="Center" Margin="0,12,0,8" />
+                    <Button Content="{Binding [browse_pdfs], Source={x:Static svc:Loc.I}, Mode=OneWay}" Command="{Binding BrowseFilesCommand}" Style="{StaticResource MaterialDesignOutlinedButton}" HorizontalAlignment="Center" />
                 </StackPanel>
             </Border>
 
-            <!-- File List -->
+            <!-- File cards with page preview -->
             <ItemsControl ItemsSource="{Binding Files}" Margin="0,16,0,0">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Style="{StaticResource FileListItem}">
+                        <Border Background="#1A1A2E" CornerRadius="10" Padding="14" Margin="0,4" BorderBrush="#22FFFFFF" BorderThickness="1">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <!-- Reorder Buttons -->
-                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                                    <Button Command="{Binding DataContext.MoveUpCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                            CommandParameter="{Binding}"
-                                            Style="{StaticResource MaterialDesignIconButton}"
-                                            Width="24" Height="20" Padding="0">
-                                        <materialDesign:PackIcon Kind="ChevronUp" Width="14" Height="14" />
-                                    </Button>
-                                    <Button Command="{Binding DataContext.MoveDownCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                            CommandParameter="{Binding}"
-                                            Style="{StaticResource MaterialDesignIconButton}"
-                                            Width="24" Height="20" Padding="0">
-                                        <materialDesign:PackIcon Kind="ChevronDown" Width="14" Height="14" />
-                                    </Button>
+                                <!-- Reorder buttons -->
+                                <StackPanel Grid.Column="0" Margin="0,0,10,0" VerticalAlignment="Center">
+                                    <Button Command="{Binding DataContext.MoveUpCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
+                                            Style="{StaticResource MaterialDesignIconButton}" Width="24" Height="22" Padding="0">
+                                        <materialDesign:PackIcon Kind="ChevronUp" Width="16" Height="16" /></Button>
+                                    <Button Command="{Binding DataContext.MoveDownCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
+                                            Style="{StaticResource MaterialDesignIconButton}" Width="24" Height="22" Padding="0">
+                                        <materialDesign:PackIcon Kind="ChevronDown" Width="16" Height="16" /></Button>
                                 </StackPanel>
 
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding FileName}" FontSize="14" Foreground="#E0E0E0" />
-                                    <TextBlock Foreground="#55FFFFFF" FontSize="11">
-                                        <Run Text="{Binding PageCount}" />
-                                        <Run Text=" pages | " />
-                                        <Run Text="{Binding FileSize, Converter={StaticResource FileSizeConv}, Mode=OneWay}" />
+                                <!-- Page preview (mini page icons) -->
+                                <ItemsControl Grid.Column="1" Margin="0,0,14,0" VerticalAlignment="Center">
+                                    <ItemsControl.ItemsSource>
+                                        <Binding Path="PageCount" Converter="{x:Null}" />
+                                    </ItemsControl.ItemsSource>
+                                    <!-- Simple visual: PDF icon with page count badge -->
+                                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                                <Grid Grid.Column="1" VerticalAlignment="Center" Margin="0,0,14,0">
+                                    <Border Background="#2A1F3E" CornerRadius="8" Width="48" Height="56" />
+                                    <Border Background="#33B39DDB" CornerRadius="6" Width="44" Height="52" Margin="0,0,0,2" />
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <materialDesign:PackIcon Kind="FilePdfBox" Width="20" Height="20" Foreground="#EF5350" HorizontalAlignment="Center" />
+                                        <Border Background="#B39DDB" CornerRadius="8" Padding="6,1" HorizontalAlignment="Center" Margin="0,2,0,0">
+                                            <TextBlock Text="{Binding PageCount}" FontSize="10" FontWeight="Bold" Foreground="#1E1E2E" HorizontalAlignment="Center" />
+                                        </Border>
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- File info -->
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding FileName}" FontSize="14" Foreground="#E0E0E0" FontWeight="Medium" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Foreground="#55FFFFFF" FontSize="11" Margin="0,3,0,0">
+                                        <Run Text="{Binding PageCount, Mode=OneWay}" /> <Run Text="{Binding [pages], Source={x:Static svc:Loc.I}, Mode=OneWay}" />
+                                        <Run Text=" | " /><Run Text="{Binding FileSize, Converter={StaticResource FileSizeConv}, Mode=OneWay}" />
                                     </TextBlock>
                                 </StackPanel>
 
-                                <materialDesign:PackIcon Grid.Column="2" Kind="FilePdfBox"
-                                                         Foreground="#EF5350" Width="20" Height="20"
-                                                         VerticalAlignment="Center" Margin="8,0" />
-
-                                <Button Grid.Column="3"
-                                        Command="{Binding DataContext.RemoveFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                        CommandParameter="{Binding}"
-                                        Style="{StaticResource MaterialDesignIconButton}"
-                                        Width="28" Height="28" Padding="0">
-                                    <materialDesign:PackIcon Kind="Close" Width="16" Height="16" />
-                                </Button>
+                                <Button Grid.Column="3" Command="{Binding DataContext.RemoveFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
+                                        Style="{StaticResource MaterialDesignIconButton}" Width="28" Height="28" Padding="0" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="Close" Width="16" Height="16" /></Button>
                             </Grid>
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <!-- Actions -->
             <Grid Margin="0,20,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <TextBlock Grid.Column="0" Text="{Binding StatusText}" Foreground="#80CBC4"
-                           FontSize="13" VerticalAlignment="Center" />
-
-                <Button Grid.Column="1" Content="Clear All" Margin="0,0,8,0"
-                        Command="{Binding ClearFilesCommand}"
-                        Style="{StaticResource MaterialDesignOutlinedButton}" />
-                <Button Grid.Column="2" Command="{Binding MergeCommand}"
-                        IsEnabled="{Binding IsMerging, Converter={StaticResource InvBoolToVis}}"
-                        Style="{StaticResource MaterialDesignRaisedButton}"
-                        Background="#7E57C2" BorderBrush="#7E57C2">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="Merge" VerticalAlignment="Center" />
-                        <TextBlock Text="Merge PDFs" Margin="8,0,0,0" />
+                        <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" Width="16" Height="16" IsIndeterminate="True" Foreground="#B39DDB" Margin="0,0,8,0" Visibility="{Binding IsMerging, Converter={StaticResource BoolToVis}}" />
+                        <materialDesign:PackIcon Kind="CheckCircleOutline" Width="16" Height="16" Foreground="#80CBC4" Margin="0,0,8,0" Visibility="{Binding ShowOpenButtons, Converter={StaticResource BoolToVis}}" />
+                        <TextBlock Text="{Binding StatusText}" Foreground="#80CBC4" FontSize="13" VerticalAlignment="Center" />
+                    </StackPanel>
+                </StackPanel>
+                <Button Grid.Column="1" Command="{Binding OpenFileCommand}" Visibility="{Binding ShowOpenButtons, Converter={StaticResource BoolToVis}}" Style="{StaticResource OpenButton}" Margin="0,0,4,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="FileOutline" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,4,0" />
+                        <TextBlock Text="{Binding [open_file], Source={x:Static svc:Loc.I}, Mode=OneWay}" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
+                <Button Grid.Column="2" Command="{Binding OpenFolderCommand}" Visibility="{Binding ShowOpenButtons, Converter={StaticResource BoolToVis}}" Style="{StaticResource OpenButton}" Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="FolderOpenOutline" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,4,0" />
+                        <TextBlock Text="{Binding [open_folder], Source={x:Static svc:Loc.I}, Mode=OneWay}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Grid.Column="3" Content="{Binding [clear_all], Source={x:Static svc:Loc.I}, Mode=OneWay}" Margin="0,0,8,0" Command="{Binding ClearFilesCommand}" Style="{StaticResource MaterialDesignOutlinedButton}" />
+                <Button Grid.Column="4" Command="{Binding MergeCommand}" Style="{StaticResource GlowButton}">
+                    <StackPanel Orientation="Horizontal"><materialDesign:PackIcon Kind="Merge" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding [merge_btn], Source={x:Static svc:Loc.I}, Mode=OneWay}" Margin="8,0,0,0" /></StackPanel></Button>
             </Grid>
         </StackPanel>
     </ScrollViewer>

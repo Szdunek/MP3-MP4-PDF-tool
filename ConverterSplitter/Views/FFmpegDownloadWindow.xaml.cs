@@ -32,28 +32,22 @@ public partial class FFmpegDownloadWindow : Window
         {
             await FFmpegDownloader.DownloadAsync(progress, _cts.Token);
             WasDownloaded = true;
-            StatusText.Text = "FFmpeg installed successfully!";
+            StatusText.Text = Loc.I["ffmpeg_installed"];
             ProgressText.Text = "";
-
-            // Auto-close after brief delay
             await Task.Delay(1200);
             DialogResult = true;
             Close();
         }
         catch (OperationCanceledException)
         {
-            StatusText.Text = "Download cancelled.";
-            DownloadButton.IsEnabled = true;
-            SkipButton.IsEnabled = true;
-            ProgressBar.Visibility = Visibility.Collapsed;
+            StatusText.Text = Loc.I["ffmpeg_cancelled"];
+            ResetButtons();
         }
         catch (Exception ex)
         {
-            StatusText.Text = $"Download failed: {ex.Message}";
-            DownloadButton.IsEnabled = true;
-            SkipButton.IsEnabled = true;
-            ProgressBar.Visibility = Visibility.Collapsed;
-            ProgressText.Text = "You can retry or install FFmpeg manually.";
+            StatusText.Text = $"{Loc.I["ffmpeg_failed"]} {ex.Message}";
+            ProgressText.Text = Loc.I["ffmpeg_retry"];
+            ResetButtons();
         }
     }
 
@@ -62,6 +56,13 @@ public partial class FFmpegDownloadWindow : Window
         _cts?.Cancel();
         DialogResult = false;
         Close();
+    }
+
+    private void ResetButtons()
+    {
+        DownloadButton.IsEnabled = true;
+        SkipButton.IsEnabled = true;
+        ProgressBar.Visibility = Visibility.Collapsed;
     }
 
     protected override void OnClosed(EventArgs e)

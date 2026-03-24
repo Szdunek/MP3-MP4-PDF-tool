@@ -24,4 +24,13 @@ public partial class PdfSplitterView : UserControl
             : DragDropEffects.None;
         e.Handled = true;
     }
+
+    private void OnSplitModeChecked(object sender, RoutedEventArgs e)
+    {
+        if (sender is RadioButton rb && rb.Tag is string tag && DataContext is PdfSplitterViewModel vm)
+        {
+            if (int.TryParse(tag, out var mode))
+                vm.SplitMode = mode;
+        }
+    }
 }
