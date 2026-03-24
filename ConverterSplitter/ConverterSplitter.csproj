@@ -12,6 +12,8 @@
     <AssemblyName>ConverterSplitter</AssemblyName>
     <Product>Converter Splitter</Product>
     <Description>All-in-one local file converter and splitter tool</Description>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
 
   <ItemGroup>

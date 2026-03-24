@@ -39,29 +39,15 @@ jobs:
             -r win-x64 `
             --self-contained true `
             -p:PublishSingleFile=true `
-            -p:IncludeNativeLibrariesForSelfExtract=true `
             -p:Version=${{ steps.version.outputs.tag }} `
             -p:AssemblyVersion=${{ steps.version.outputs.tag }}.0 `
             -p:FileVersion=${{ steps.version.outputs.tag }}.0 `
             -o publish/win-x64
 
-      - name: Publish - Framework-dependent (win-x64)
-        run: |
-          dotnet publish ConverterSplitter/ConverterSplitter.csproj `
-            -c Release `
-            -r win-x64 `
-            --self-contained false `
-            -p:PublishSingleFile=true `
-            -p:Version=${{ steps.version.outputs.tag }} `
-            -p:AssemblyVersion=${{ steps.version.outputs.tag }}.0 `
-            -p:FileVersion=${{ steps.version.outputs.tag }}.0 `
-            -o publish/win-x64-fdd
-
-      - name: Create ZIP archives
+      - name: Create ZIP archive
         shell: pwsh
         run: |
-          Compress-Archive -Path publish/win-x64/* -DestinationPath "ConverterSplitter-${{ steps.version.outputs.tag }}-win-x64-self-contained.zip"
-          Compress-Archive -Path publish/win-x64-fdd/* -DestinationPath "ConverterSplitter-${{ steps.version.outputs.tag }}-win-x64.zip"
+          Compress-Archive -Path publish/win-x64/* -DestinationPath "ConverterSplitter-${{ steps.version.outputs.tag }}-win-x64.zip"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -72,5 +58,4 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            ConverterSplitter-${{ steps.version.outputs.tag }}-win-x64-self-contained.zip
             ConverterSplitter-${{ steps.version.outputs.tag }}-win-x64.zip

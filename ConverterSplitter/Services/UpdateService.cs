@@ -124,12 +124,15 @@ public static class UpdateService
             {
                 var buffer = new byte[81920];
                 int bytesRead;
+                var lastReport = DateTime.UtcNow;
                 while ((bytesRead = await contentStream.ReadAsync(buffer, ct)) > 0)
                 {
                     await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), ct);
                     downloaded += bytesRead;
-                    if (totalBytes > 0)
+                    var now = DateTime.UtcNow;
+                    if (totalBytes > 0 && (now - lastReport).TotalMilliseconds >= 100)
                     {
+                        lastReport = now;
                         var pct = (double)downloaded / totalBytes * 70;
                         var mb = downloaded / (1024.0 * 1024);
                         var totalMb = totalBytes / (1024.0 * 1024);

@@ -49,17 +49,20 @@ public static class FFmpegDownloader
             long downloaded = 0;
 
             using (var contentStream = await response.Content.ReadAsStreamAsync(ct))
-            using (var fileStream = new FileStream(tempZip, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+            using (var fileStream = new FileStream(tempZip, FileMode.Create, FileAccess.Write, FileShare.None, 81920, true))
             {
                 var buffer = new byte[81920];
                 int bytesRead;
+                var lastReport = DateTime.UtcNow;
                 while ((bytesRead = await contentStream.ReadAsync(buffer, ct)) > 0)
                 {
                     await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), ct);
                     downloaded += bytesRead;
-                    if (totalBytes > 0)
+                    var now = DateTime.UtcNow;
+                    if (totalBytes > 0 && (now - lastReport).TotalMilliseconds >= 100)
                     {
-                        var pct = (double)downloaded / totalBytes * 80; // 0-80% for download
+                        lastReport = now;
+                        var pct = (double)downloaded / totalBytes * 80;
                         var mb = downloaded / (1024.0 * 1024);
                         var totalMb = totalBytes / (1024.0 * 1024);
                         progress?.Report(($"Downloading FFmpeg... {mb:F0}/{totalMb:F0} MB", pct));
